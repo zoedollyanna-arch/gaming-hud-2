@@ -1,18 +1,15 @@
-# Render Web Service configuration for the MOAP Tic Tac Toe backend
-# Deploy this as a Web Service and set environment variables listed below.
+# Render web service blueprint for MOAP Tic Tac Toe backend
+# Force absolute paths so Render reliably finds backend/package.json.
 
 services:
   - type: web
     name: moap-ttt-backend
     env: node
-    region: oregon # change if you prefer
     plan: free
+    region: oregon
 
-    # Ensure commands run from the repo root (so `cd backend` works)
-    rootDirectory: "."
-
-    buildCommand: "cd backend && npm install"
-    startCommand: "cd backend && npm start"
+    buildCommand: "cd /opt/render/project/backend && npm install"
+    startCommand: "cd /opt/render/project/backend && npm start"
 
     envVars:
       - key: NODE_ENV
