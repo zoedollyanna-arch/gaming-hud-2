@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>MOAP Tic Tac Toe</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="hud">
+      <header class="hud__top">
+        <div class="hud__brand">
+          <div class="hud__title">TIC-TAC TOE</div>
+          <div class="hud__subtitle">MOAP HUD • vs Robot</div>
+        </div>
+
+        <section class="stats stats--card" aria-live="polite">
+          <div class="stats__label">Player Stats</div>
+          <div class="stats__row">
+            <div class="stats__key">Name</div>
+            <div class="stats__value" id="username">—</div>
+          </div>
+          <div class="stats__row">
+            <div class="stats__key">Wins</div>
+            <div class="stats__value" id="wins">0</div>
+          </div>
+          <div class="stats__row">
+            <div class="stats__key">Losses</div>
+            <div class="stats__value" id="losses">0</div>
+          </div>
+          <div class="stats__row">
+            <div class="stats__key">Games</div>
+            <div class="stats__value" id="gamesPlayed">0</div>
+          </div>
+
+          <div class="statusLine" id="statsStatus" role="status"></div>
+        </section>
+      </header>
+
+      <main class="game">
+        <section class="statusLine statusLine--big" id="appStatus" role="status"></section>
+
+        <section class="boardWrap">
+          <div class="board" id="board" aria-label="Tic Tac Toe board" role="grid"></div>
+
+          <div class="hud__controls">
+            <div class="turn" id="turn">You: X • Robot: O</div>
+
+            <div class="buttons">
+              <button id="newGameBtn" class="btn" type="button" aria-label="New game">
+                New Game
+              </button>
+              <button id="refreshStatsBtn" class="btn btn--ghost" type="button" aria-label="Refresh stats">
+                Refresh Stats
+              </button>
+            </div>
+
+            <div class="msg" id="gameMsg" role="status" aria-live="polite"></div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script src="./ttt.js"></script>
+  </body>
+</html>

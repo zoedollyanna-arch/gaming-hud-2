@@ -1,0 +1,29 @@
+# Render Web Service configuration for the MOAP Tic Tac Toe backend
+# Deploy this as a Web Service and set environment variables listed below.
+
+services:
+  - type: web
+    name: moap-ttt-backend
+    env: node
+    region: oregon # change if you prefer
+    plan: free
+
+    # Ensure commands run from the repo root (so `cd backend` works)
+    rootDirectory: "."
+
+    buildCommand: "cd backend && npm install"
+    startCommand: "cd backend && npm start"
+
+    envVars:
+      - key: NODE_ENV
+        value: "production"
+      - key: PORT
+        value: "10000"
+      - key: DATABASE_URL
+        value: "postgresql://postgres.qwrnfgvvdrwyfuwqiejp:Cdfrnc1AtUFgMNuV@aws-1-us-east-1.pooler.supabase.com:5432/postgres"
+      - key: PGSSLMODE
+        value: "require"
+      - key: CORS_ORIGIN
+        value: "*"
+      - key: MORGAN_STYLE
+        value: "combined"

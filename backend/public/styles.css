@@ -1,0 +1,221 @@
+:root{
+  --bg:#0b0b0f;
+  --panel:#151522;
+  --ink:#f3f3ff;
+  --muted:#a9a9c6;
+  --line:#000;
+  --accent:#ff3d7f;
+  --good:#37d67a;
+  --bad:#ff4b4b;
+  --warn:#ffd84a;
+  --shadow: 4px 4px 0 #000;
+
+  --btn:#10101a;
+  --btnHover:#1a1a2a;
+
+  --x:#ff3d7f;
+  --o:#37d67a;
+}
+
+*{ box-sizing:border-box; }
+html,body{ height:100%; }
+body{
+  margin:0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "Liberation Sans", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.hud{
+  width: 100%;
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 14px;
+}
+
+.hud__top{
+  display:flex;
+  gap: 12px;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.hud__brand{
+  min-width: 260px;
+}
+
+.hud__title{
+  font-size: 32px;
+  line-height: 1;
+  letter-spacing: 0.08em;
+  font-weight: 900;
+  text-shadow: 3px 3px 0 #000;
+}
+.hud__subtitle{
+  margin-top: 6px;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.stats{
+  border: 3px solid #000;
+  background: var(--panel);
+  box-shadow: var(--shadow);
+  padding: 12px 12px;
+  border-radius: 10px;
+  min-width: 280px;
+}
+
+.stats__label{
+  font-weight: 900;
+  margin-bottom: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.stats__row{
+  display:flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 6px 0;
+  border-bottom: 2px dashed rgba(255,255,255,0.08);
+}
+.stats__row:last-child{ border-bottom: none; }
+
+.stats__key{
+  color: var(--muted);
+  font-weight: 800;
+}
+.stats__value{
+  font-weight: 900;
+}
+
+.statusLine{
+  margin-top: 10px;
+  font-weight: 900;
+  min-height: 22px;
+  color: var(--muted);
+}
+
+.statusLine--big{
+  font-size: 18px;
+  color: var(--warn);
+  text-shadow: 2px 2px 0 #000;
+  margin-bottom: 8px;
+}
+
+.game{
+  margin-top: 12px;
+}
+
+.boardWrap{
+  border: 3px solid #000;
+  background: var(--panel);
+  box-shadow: var(--shadow);
+  border-radius: 14px;
+  padding: 12px;
+}
+
+.board{
+  display:grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  width: 100%;
+  max-width: 520px;
+  margin: 0 auto;
+}
+
+.cell{
+  aspect-ratio: 1 / 1;
+  border: 3px solid #000;
+  border-radius: 12px;
+  background: #0f0f18;
+  box-shadow: 3px 3px 0 #000;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size: clamp(42px, 10vw, 64px);
+  font-weight: 1000;
+  cursor:pointer;
+  user-select:none;
+  transition: transform 120ms ease, background 120ms ease;
+}
+
+.cell:hover{ transform: translate(-1px,-1px); background: var(--btnHover); }
+.cell:disabled{ cursor: not-allowed; opacity: 0.9; }
+
+.cell--x{ color: var(--x); }
+.cell--o{ color: var(--o); }
+.cell--win-x{ outline: 5px solid var(--x); }
+.cell--win-o{ outline: 5px solid var(--o); }
+
+.hud__controls{
+  margin-top: 10px;
+  display:flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+}
+
+.turn{
+  width: 100%;
+  max-width: 520px;
+  border: 2px dashed rgba(255,255,255,0.12);
+  padding: 10px 12px;
+  border-radius: 10px;
+  text-align:center;
+  font-weight: 900;
+  color: var(--ink);
+}
+
+.buttons{
+  display:flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content:center;
+  width: 100%;
+  max-width: 520px;
+}
+
+.btn{
+  border: 3px solid #000;
+  background: var(--btn);
+  color: var(--ink);
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-weight: 900;
+  letter-spacing: 0.02em;
+  cursor:pointer;
+  box-shadow: 3px 3px 0 #000;
+}
+.btn:hover{ background: var(--btnHover); transform: translate(-1px,-1px); }
+.btn:active{ transform: translate(1px,1px); }
+.btn:disabled{ opacity: 0.65; cursor:not-allowed; }
+
+.btn--ghost{
+  background: transparent;
+}
+
+.msg{
+  min-height: 26px;
+  width: 100%;
+  max-width: 520px;
+  text-align:center;
+  font-weight: 900;
+  color: var(--muted);
+}
+
+.msg--error{ color: var(--bad); }
+.msg--ok{ color: var(--good); }
+.msg--loading{ color: var(--warn); }
+
+@media (max-width: 520px){
+  .hud__title{ font-size: 26px; }
+  .stats{ min-width: 100%; }
+  .board{ gap: 8px; }
+  .boardWrap{ padding: 10px; }
+  .cell{ border-width: 2px; border-radius: 10px; }
+}
