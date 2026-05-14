@@ -1,7 +1,6 @@
 # Render web service blueprint for MOAP Tic Tac Toe backend
-# Deploy from repo root using root/package.json + root/server.js (no fragile cd paths).
-
-version: 1
+# IMPORTANT: Render repo clone root is /opt/render/project/src
+# This repo has backend/package.json (not root package.json), so we cd into backend.
 
 services:
   - type: web
@@ -10,10 +9,8 @@ services:
     plan: free
     region: oregon
 
-    rootDirectory: "."
-
-    buildCommand: "npm install"
-    startCommand: "npm start"
+    buildCommand: "cd backend && npm install"
+    startCommand: "cd backend && npm start"
 
     envVars:
       - key: NODE_ENV
