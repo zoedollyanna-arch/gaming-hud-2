@@ -1,5 +1,6 @@
 # Render web service blueprint for MOAP Tic Tac Toe backend
-# Use Render’s clone location: /opt/render/project/src
+# Robust commands: Render has shown different clone paths (/opt/render/project vs /opt/render/project/src).
+# These commands detect the correct backend directory at build/start time.
 
 services:
   - type: web
@@ -8,8 +9,8 @@ services:
     plan: free
     region: oregon
 
-    buildCommand: "cd /opt/render/project/src/backend && npm install"
-    startCommand: "cd /opt/render/project/src/backend && npm start"
+    buildCommand: "bash -lc 'if [ -d /opt/render/project/src/backend ]; then npm install --prefix /opt/render/project/src/backend; else npm install --prefix /opt/render/project/backend; fi'"
+    startCommand: "bash -lc 'if [ -d /opt/render/project/src/backend ]; then npm start --prefix /opt/render/project/src/backend; else npm start --prefix /opt/render/project/backend; fi'"
 
     envVars:
       - key: NODE_ENV
