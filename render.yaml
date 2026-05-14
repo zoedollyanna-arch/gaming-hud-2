@@ -1,5 +1,5 @@
 # Render web service blueprint for MOAP Tic Tac Toe backend
-# Force absolute paths so Render reliably finds backend/package.json.
+# Use Render’s clone location: /opt/render/project/src
 
 services:
   - type: web
@@ -8,8 +8,8 @@ services:
     plan: free
     region: oregon
 
-    buildCommand: "cd /opt/render/project/backend && npm install"
-    startCommand: "cd /opt/render/project/backend && npm start"
+    buildCommand: "cd /opt/render/project/src/backend && npm install"
+    startCommand: "cd /opt/render/project/src/backend && npm start"
 
     envVars:
       - key: NODE_ENV
