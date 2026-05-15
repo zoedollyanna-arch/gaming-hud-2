@@ -322,7 +322,7 @@
 
   async function robotTurn() {
     GAME.locked = true;
-    UI.setTurnUI();
+    setTurnUI();
     UI.setGameMsg("Robot thinking…", "loading");
     await new Promise((r) => setTimeout(r, 450 + Math.random() * 250));
 

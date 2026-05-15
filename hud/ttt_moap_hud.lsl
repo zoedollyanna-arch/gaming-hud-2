@@ -8,14 +8,21 @@
 // - The HTML/JS frontend is responsible for fetching + rendering stats and posting game results.
 // - This script keeps LSL code focused on identity + MOAP setup + debugging logs.
 
-string  FACE_MEDIA = "0"; // prim face index as string in PRIM_MEDIA params
-integer FACE = 0;
+// ========= Link setup (your requirement) =========
+// Link 1: decorative frame ONLY (no media / no media texture updates)
+// Link 2: MOAP screen/display surface (ALL media/HTML rendering targets here)
+integer LINK_FRAME  = 1;
+integer LINK_SCREEN = 2;
+
+// Prim face index on the MOAP screen where media is applied
+string  FACE_MEDIA = "2"; // (informational only) prim face index as string in PRIM_MEDIA params
+integer FACE = 2;
 
 // Backend base URL (Render service URL). You MUST update this before use.
 // Examples:
 //   "https://your-render-service.onrender.com"
 //   "http://localhost:3000" for local testing
-string BACKEND_BASE_URL = "https://REPLACE_ME_WITH_YOUR_RENDER_URL";
+string BACKEND_BASE_URL = "https://gaming-hud-2.onrender.com";
 
 // Media page URL (HTML frontend). We serve the UI at "/".
 // If you change the frontend route, update this string.
@@ -26,26 +33,47 @@ string HUD_TEXT_PREFIX = "TTT MOAP";
 
 // Simple cache-buster to ensure reloads after we change identity/menu
 integer _nonce = 0;
+integer DEBUG_MODE = 0;
 
 // Cached identity
 key     gAvatarKey = NULL_KEY;
 string  gUsername = "";
 
 // ---- Utility: URL encode (minimal) ----
-string urlEncode(string s) {
-    // LSL does not have a full encoder; this minimal approach covers spaces and a few characters.
-    s = llStringReplace(s, " ", "%20");
-    s = llStringReplace(s, "\n", "%0A");
-    s = llStringReplace(s, "\r", "");
-    s = llStringReplace(s, "\"", "%22");
-    s = llStringReplace(s, "'", "%27");
-    return s;
+string urlEncode(string input) {
+    // Second Life LSL provides llEscapeURL for URL encoding.
+    return llEscapeURL(input);
+}
+
+// Check whether a string ends with "/"
+integer endsWithSlash(string s) {
+    integer len = llStringLength(s);
+    if (len <= 0) return FALSE;
+    return llGetSubString(s, len - 1, len - 1) == "/";
+}
+
+integer linksOk() {
+    integer total = llGetNumberOfPrims();
+    // llGetNumberOfPrims returns the number of linked prims INCLUDING the root prim as link 1.
+    if (total < LINK_SCREEN) {
+        llOwnerSay("HUD ERROR: Not enough linked prims. Have=" + (string)total + " need link " + (string)LINK_SCREEN + ".");
+        return FALSE;
+    }
+    if (LINK_FRAME != 1) {
+        // Your requirement is explicit: link 1 = frame. We keep this for clarity.
+        llOwnerSay("HUD WARNING: LINK_FRAME expected to be 1 by requirement; current LINK_FRAME=" + (string)LINK_FRAME + ".");
+    }
+    return TRUE;
 }
 
 // ---- Build the MOAP page URL with query parameters ----
 string buildPageUrl() {
     string base = BACKEND_BASE_URL;
-    if (llStringEndsWith(base, "/")) base = llDeleteSubString(base, llStringLength(base)-1, llStringLength(base)-1);
+    integer baseHasSlash = endsWithSlash(base);
+    if (baseHasSlash) {
+        integer len = llStringLength(base);
+        base = llDeleteSubString(base, len - 1, len - 1);
+    }
 
     string page = base + PAGE_URL_SUFFIX;
 
@@ -61,52 +89,43 @@ string buildPageUrl() {
     return url;
 }
 
-// ---- Load MOAP into prim face ----
-void loadMoap() {
+// ---- Load MOAP into prim face (TARGET: link 2 only) ----
+loadMoap() {
+    if (!linksOk()) return;
     if (gAvatarKey == NULL_KEY || gUsername == "" ) return;
 
     string url = buildPageUrl();
 
-    // Ensure prim-media is configured on the face:
-    // Using llSetPrimMediaParams:
-    //   PRIM_MEDIA_CURRENT_URL, url,
-    //   PRIM_MEDIA_AUTO_PLAY, TRUE,
-    //   PRIM_MEDIA_AUTO_SCALE, TRUE (some viewers use this), PRIM_MEDIA_AUTO_ZOOM, TRUE,
-    //   PRIM_MEDIA_PERMS_INTERACT, TRUE, PRIM_MEDIA_PERM_ANYONE, TRUE
-    //
-    // Exact flags can vary by viewer; these are common defaults for interactive shared media.
-    llSetPrimMediaParams(
+    // Configure media on the LINK_SCREEN prim face.
+    // Minimal + type-safe parameter set.
+    llSetLinkMedia(
+        LINK_SCREEN,
         FACE,
         [
-            // turn on / set url
-            1, url, // PRIM_MEDIA_CURRENT_URL (typically 1)
-            // autoplay / presentation
-            3, TRUE, // PRIM_MEDIA_AUTO_PLAY
-            9, TRUE, // PRIM_MEDIA_AUTO_ZOOM
-            // permissions for interaction
-            15, TRUE, // PRIM_MEDIA_PERMS_INTERACT
-            16, 2,    // PRIM_MEDIA_PERM_ANYONE (commonly encoded as 2 for anyone; viewers may ignore)
+            PRIM_MEDIA_CURRENT_URL, url,
+            PRIM_MEDIA_HOME_URL, url,
+            PRIM_MEDIA_AUTO_PLAY, TRUE,
+            // Permissions mask for who can interact with the media
+            PRIM_MEDIA_PERMS_INTERACT, PRIM_MEDIA_PERM_ANYONE
         ]
     );
 
-    // Some viewers require HOME_URL too; harmless if ignored.
-    llSetPrimMediaParams(
-        FACE,
-        [
-            2, url // PRIM_MEDIA_HOME_URL (typically 2)
-        ]
-    );
-
-    // Update in-world text for quick confirmation
+    // Update in-world text for quick confirmation.
+    // This updates the script prim specifically. If your script is on a non-screen prim,
+    // consider moving the script to the screen prim or replacing this with a link-targeted text call.
     llSetText(HUD_TEXT_PREFIX + "\nLoading: " + gUsername, <1,1,1>, 1.0);
 }
 
-// ---- Lightweight stats GET for debugging logs ----
-void debugFetchStats() {
+// ---- Lightweight stats GET for debugging logs (no link targeting needed) ----
+debugFetchStats() {
     if (gAvatarKey == NULL_KEY || gUsername == "") return;
 
     string base = BACKEND_BASE_URL;
-    if (llStringEndsWith(base, "/")) base = llDeleteSubString(base, llStringLength(base)-1, llStringLength(base)-1);
+    integer baseHasSlash = endsWithSlash(base);
+    if (baseHasSlash) {
+        integer len = llStringLength(base);
+        base = llDeleteSubString(base, len - 1, len - 1);
+    }
 
     string url = base
         + "/api/player/stats?avatarUuid=" + (string)gAvatarKey
@@ -116,41 +135,96 @@ void debugFetchStats() {
 }
 
 // ---- Lifecycle ----
+integer refreshIdentityAndLoad(integer bumpNonce) {
+    // Called when attaching/wearing so MOAP shows immediately (no touch required).
+    key owner = llGetOwner();
+    if (owner == NULL_KEY) return FALSE;
+
+    string name = llGetDisplayName(owner);
+    if (name == "") return FALSE;
+
+    gAvatarKey = owner;
+    gUsername = name;
+
+    if (bumpNonce) _nonce++;
+
+    loadMoap();
+    debugFetchStats();
+    return TRUE;
+}
+
 default
 {
     state_entry() {
-        // If worn, llGetOwner() typically returns the wearer.
-        // If not worn yet, we’ll update on CHANGED_OWNER.
-        llOwnerSay("TTT MOAP HUD ready. Wear the HUD to load the game.");
+        llOwnerSay("TTT MOAP HUD ready. Wear/attach the HUD to load the game.");
+
+        // If already attached/worn when script starts, load immediately.
+        refreshIdentityAndLoad(FALSE);
+    }
+
+    attach(key id) {
+        // Attach event is the most reliable way to load on "attach" (not only CHANGED_OWNER).
+        // id == NULL_KEY means detached.
+        if (id != NULL_KEY) {
+            if (DEBUG_MODE) llOwnerSay("HUD DEBUG: attach() id present, loading MOAP instantly.");
+            refreshIdentityAndLoad(TRUE);
+        }
     }
 
     changed(integer change) {
         if (change & CHANGED_OWNER) {
-            gAvatarKey = llGetOwner();
-            gUsername = llGetDisplayName(gAvatarKey);
-            _nonce++;
-            loadMoap();
-            debugFetchStats();
+            if (DEBUG_MODE) llOwnerSay("HUD DEBUG: CHANGED_OWNER received, loading MOAP.");
+            refreshIdentityAndLoad(TRUE);
         }
+        // CHANGED_LINK just indicates linking changes; we don’t need to handle it beyond validation.
         if (change & CHANGED_LINK) {
-            // ignore
+            // no-op; next touch/owner-change will re-validate + reload
         }
     }
 
     touch_start(integer total_number) {
         // Touch => reload page (bust cache)
-        _nonce++;
-        loadMoap();
-        debugFetchStats();
+        // Requirement: interaction logic targets link 2 specifically.
+
+        integer ok = linksOk();
+        if (!ok) {
+            if (DEBUG_MODE) llOwnerSay("HUD DEBUG: linksOk()=FALSE; total=" + (string)total_number + " LINK_SCREEN=" + (string)LINK_SCREEN);
+            return;
+        }
+
+        // DEBUG: report which link(s) were touched so we can verify LINK_SCREEN mapping
+        if (DEBUG_MODE) llOwnerSay("HUD DEBUG: touch_start total=" + (string)total_number + " LINK_SCREEN=" + (string)LINK_SCREEN);
+
+        integer i;
+        for (i = 0; i < total_number; i++) {
+            integer touchedLink = llDetectedLinkNumber(i);
+            if (DEBUG_MODE) llOwnerSay("HUD DEBUG: touched link=" + (string)touchedLink + " (i=" + (string)i + ")");
+
+            // Filter touches so only LINK_SCREEN triggers reload.
+            if (touchedLink == LINK_SCREEN) {
+                _nonce++;
+                loadMoap();
+                debugFetchStats();
+                if (DEBUG_MODE) llOwnerSay("HUD DEBUG: reloaded (touched LINK_SCREEN). nonce=" + (string)_nonce);
+                // Only reload once per touch_start even if multiple points are hit.
+                return;
+            }
+        }
+
+        // If we get here, user touched but not link 2.
+        if (DEBUG_MODE) llOwnerSay("HUD DEBUG: touch did not include LINK_SCREEN; no reload.");
     }
 
     http_response(key request_id, integer status, list metadata, string body) {
-        // Log stats response for debugging.
-        // Frontend will also fetch stats and render them; this is just for HUD visibility.
+        // Avoid nearby chat spam: only show errors by default.
+        // The HTML frontend also fetches + renders stats; this is just HUD-side logging.
+
         if (status >= 200 && status < 300) {
-            llOwnerSay("Stats OK: " + body);
-        } else {
-            llOwnerSay("Stats error (" + (string)status + "): " + body);
+            if (DEBUG_MODE) llOwnerSay("Stats OK");
+            return;
         }
+
+        // Errors: show (optionally you can gate this behind DEBUG_MODE too)
+        llOwnerSay("Stats error (" + (string)status + "): " + body);
     }
 }

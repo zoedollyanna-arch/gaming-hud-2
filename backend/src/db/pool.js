@@ -20,11 +20,16 @@ function logDbEnvForDebug() {
   // Keep this safe: never log full DATABASE_URL.
   // This runs only when env is missing/misconfigured.
   // eslint-disable-next-line no-console
+  const relatedKeys = Object.keys(process.env)
+    .filter((k) => /DATABASE|DB_URL|DBURL|POSTGRES|PGSSLMODE|PG_/.test(k))
+    .sort();
+
   console.error("DB ENV DEBUG:", {
     DATABASE_URL: summarizeSecret(process.env.DATABASE_URL),
     PGSSLMODE: process.env.PGSSLMODE ? `present(${process.env.PGSSLMODE})` : "missing",
     PG_POOL_MAX: process.env.PG_POOL_MAX ? `present(${process.env.PG_POOL_MAX})` : "missing",
     PG_IDLE_TIMEOUT_MS: process.env.PG_IDLE_TIMEOUT_MS ? `present(${process.env.PG_IDLE_TIMEOUT_MS})` : "missing",
+    RELATED_ENV_KEYS: relatedKeys,
   });
 }
 

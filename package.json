@@ -1,0 +1,23 @@
+{
+  "name": "moap-ttt-hud",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Second Life MOAP Tic Tac Toe HUD backend (Render/Supabase/Postgres)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "migrate": "node backend/src/migrate.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "helmet": "^7.1.0",
+    "morgan": "^1.10.0",
+    "pg": "^8.12.0"
+  }
+}
