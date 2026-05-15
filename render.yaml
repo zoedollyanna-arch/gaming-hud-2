@@ -5,7 +5,7 @@
 services:
   - type: web
     name: moap-ttt-backend
-    env: node
+    runtime: node
     plan: free
     region: oregon
 
